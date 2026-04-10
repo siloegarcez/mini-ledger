@@ -1,0 +1,8 @@
+bin/
+*.json
+test.go
+*.env
+.vscode
+.github
+coverage.out
+/tmp
