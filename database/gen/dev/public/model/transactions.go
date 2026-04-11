@@ -18,6 +18,5 @@ type Transactions struct {
 	Amount          int64
 	Currency        string
 	Scale           int16
-	CreatedAt       time.Time
 	EventDate       time.Time
 }

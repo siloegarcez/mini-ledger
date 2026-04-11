@@ -1,7 +1,7 @@
 begin;
 
 create table if not exists operations_types (
-    id smallint primary key,
+    operation_id smallint primary key,
     description text not null,
     sign_multiplier smallint not null,
     created_at timestamptz not null default now(),
@@ -11,7 +11,7 @@ create table if not exists operations_types (
 
 revoke update on operations_types from public;
 
-insert into operations_types (id, description, sign_multiplier) values
+insert into operations_types (operation_id, description, sign_multiplier) values
 (1, 'PURCHASE', -1),
 (2, 'INSTALLMENT_PURCHASE', -1),
 (3, 'WITHDRAWAL', -1),

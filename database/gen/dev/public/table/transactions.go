@@ -23,7 +23,6 @@ type transactionsTable struct {
 	Amount          postgres.ColumnInteger
 	Currency        postgres.ColumnString
 	Scale           postgres.ColumnInteger
-	CreatedAt       postgres.ColumnTimestampz
 	EventDate       postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
@@ -72,11 +71,10 @@ func newTransactionsTableImpl(schemaName, tableName, alias string) transactionsT
 		AmountColumn          = postgres.IntegerColumn("amount")
 		CurrencyColumn        = postgres.StringColumn("currency")
 		ScaleColumn           = postgres.IntegerColumn("scale")
-		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
 		EventDateColumn       = postgres.TimestampzColumn("event_date")
-		allColumns            = postgres.ColumnList{IDColumn, AccountIDColumn, OperationTypeIDColumn, AmountColumn, CurrencyColumn, ScaleColumn, CreatedAtColumn, EventDateColumn}
-		mutableColumns        = postgres.ColumnList{AccountIDColumn, OperationTypeIDColumn, AmountColumn, CurrencyColumn, ScaleColumn, CreatedAtColumn, EventDateColumn}
-		defaultColumns        = postgres.ColumnList{CreatedAtColumn}
+		allColumns            = postgres.ColumnList{IDColumn, AccountIDColumn, OperationTypeIDColumn, AmountColumn, CurrencyColumn, ScaleColumn, EventDateColumn}
+		mutableColumns        = postgres.ColumnList{AccountIDColumn, OperationTypeIDColumn, AmountColumn, CurrencyColumn, ScaleColumn, EventDateColumn}
+		defaultColumns        = postgres.ColumnList{}
 	)
 
 	return transactionsTable{
@@ -89,7 +87,6 @@ func newTransactionsTableImpl(schemaName, tableName, alias string) transactionsT
 		Amount:          AmountColumn,
 		Currency:        CurrencyColumn,
 		Scale:           ScaleColumn,
-		CreatedAt:       CreatedAtColumn,
 		EventDate:       EventDateColumn,
 
 		AllColumns:     allColumns,

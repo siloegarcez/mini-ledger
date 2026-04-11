@@ -12,7 +12,7 @@ import (
 )
 
 type OperationsTypes struct {
-	ID             int16 `sql:"primary_key"`
+	OperationID    int16 `sql:"primary_key"`
 	Description    string
 	SignMultiplier int16
 	CreatedAt      time.Time

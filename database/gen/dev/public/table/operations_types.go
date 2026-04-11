@@ -17,7 +17,7 @@ type operationsTypesTable struct {
 	postgres.Table
 
 	// Columns
-	ID             postgres.ColumnInteger
+	OperationID    postgres.ColumnInteger
 	Description    postgres.ColumnString
 	SignMultiplier postgres.ColumnInteger
 	CreatedAt      postgres.ColumnTimestampz
@@ -62,11 +62,11 @@ func newOperationsTypesTable(schemaName, tableName, alias string) *OperationsTyp
 
 func newOperationsTypesTableImpl(schemaName, tableName, alias string) operationsTypesTable {
 	var (
-		IDColumn             = postgres.IntegerColumn("id")
+		OperationIDColumn    = postgres.IntegerColumn("operation_id")
 		DescriptionColumn    = postgres.StringColumn("description")
 		SignMultiplierColumn = postgres.IntegerColumn("sign_multiplier")
 		CreatedAtColumn      = postgres.TimestampzColumn("created_at")
-		allColumns           = postgres.ColumnList{IDColumn, DescriptionColumn, SignMultiplierColumn, CreatedAtColumn}
+		allColumns           = postgres.ColumnList{OperationIDColumn, DescriptionColumn, SignMultiplierColumn, CreatedAtColumn}
 		mutableColumns       = postgres.ColumnList{DescriptionColumn, SignMultiplierColumn, CreatedAtColumn}
 		defaultColumns       = postgres.ColumnList{CreatedAtColumn}
 	)
@@ -75,7 +75,7 @@ func newOperationsTypesTableImpl(schemaName, tableName, alias string) operations
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:             IDColumn,
+		OperationID:    OperationIDColumn,
 		Description:    DescriptionColumn,
 		SignMultiplier: SignMultiplierColumn,
 		CreatedAt:      CreatedAtColumn,
