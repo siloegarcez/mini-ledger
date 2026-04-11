@@ -6,3 +6,4 @@ test.go
 .github
 coverage.out
 /tmp
+test.go

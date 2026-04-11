@@ -19,8 +19,6 @@ build:
 	@go build -v -o bin/api cmd/api/main.go
 	@echo "Build Finished!"
 
-tdb:
-	@bash ./scripts/bash/db.sh
 
 test:
 	@echo "Running all tests..."
@@ -42,7 +40,15 @@ lint-fix:
 	@golangci-lint run --fix
 
 mig-new:
-	@migrate create -ext sql -dir ./migrations -seq $(name)
+	@migrate create -ext sql -dir ./migrations $(name)
+
+migrate-up:
+	@migrate -path ./migrations -database "postgres://dev:dev@localhost:5432/dev?sslmode=disable&search_path=public" up
+
+jet:
+	@go run ./scripts/jet/jet.go
+
+mig-up-jet: migrate-up jet
 
 db-dev:
 	@echo "Destroying any existing Postgres container..."
