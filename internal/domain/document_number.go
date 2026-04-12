@@ -2,109 +2,52 @@ package domain
 
 import (
 	"errors"
-	"fmt"
+	"strings"
+	"unicode"
 )
 
 type DocumentNumber struct {
-	value     string
-	formatted string
-	docType   DocumentType
+	value string
 }
 
 var (
-	ErrInvalidDocumentNumberLen = errors.New(
+	ErrDocumentNumberInvalidLen = errors.New(
 		"invalid document number length",
 	)
-	ErrInvalidDocumentNumber = errors.New(
-		"invalid document number",
+	ErrDocumentNumberEmpty = errors.New(
+		"document number cannot be empty",
 	)
 )
 
 const (
-	MaxDocumentNumberLength = 18
+	MaxDocumentNumberLength = 15
 )
 
 type DocumentType int
 
-const (
-	DocumentTypeCPF DocumentType = iota + 1
-	DocumentTypeCNPJ
-)
-
-func (dt DocumentType) String() string {
-	switch dt {
-	case DocumentTypeCPF:
-		return "CPF"
-	case DocumentTypeCNPJ:
-		return "CNPJ"
-	}
-	return ""
-}
-
 func NewDocumentNumber(value string) (DocumentNumber, error) {
-	if len(value) == 0 || len(value) > MaxDocumentNumberLength {
-		return DocumentNumber{}, ErrInvalidDocumentNumberLen
+	value = strings.ToLower(removeAllWhitespace(value))
+	if len(value) == 0 {
+		return DocumentNumber{}, ErrDocumentNumberEmpty
 	}
 
-	cpf, err := ParseCPF(value)
-
-	if err == nil {
-		return DocumentNumber{
-			value:     cpf.String(),
-			formatted: cpf.Formatted(),
-			docType:   DocumentTypeCPF,
-		}, nil
+	if len(value) > MaxDocumentNumberLength {
+		return DocumentNumber{}, ErrDocumentNumberInvalidLen
 	}
 
-	cnpj, err := ParseCNPJ(value)
-
-	if err == nil {
-		return DocumentNumber{
-			value:     cnpj.String(),
-			formatted: cnpj.Formatted(),
-			docType:   DocumentTypeCNPJ,
-		}, nil
-	}
-
-	return DocumentNumber{}, ErrInvalidDocumentNumber
+	return DocumentNumber{value: value}, nil
 }
 
 func (d DocumentNumber) String() string {
 	return d.value
 }
 
-func (d DocumentNumber) Formatted() string {
-	return d.formatted
-}
-
-func (d DocumentNumber) Type() DocumentType {
-	return d.docType
-}
-
-func (d DocumentNumber) IsEmpty() bool {
-	return len(d.value) == 0
-}
-
-func (d DocumentNumber) Validate() []error {
-	errs := []error{}
-	if d.IsEmpty() {
-		errs = append(
-			errs,
-			fmt.Errorf("%w: document number cannot be empty", ErrInvalidDocumentNumber),
-		)
+func removeAllWhitespace(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		if !unicode.IsSpace(r) {
+			b.WriteRune(r)
+		}
 	}
-	if len(d.docType.String()) == 0 {
-		errs = append(
-			errs,
-			fmt.Errorf("%w: document type cannot be empty", ErrInvalidDocumentNumber),
-		)
-	}
-	if len(d.formatted) == 0 {
-		errs = append(
-			errs,
-			fmt.Errorf("%w: formatted document number cannot be empty", ErrInvalidDocumentNumber),
-		)
-	}
-
-	return errs
+	return b.String()
 }

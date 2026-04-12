@@ -3,7 +3,7 @@ begin;
 create table if not exists transactions (
     id bigint generated always as identity primary key,
     account_id bigint not null references accounts (id) on delete restrict,
-    operation_type_id smallint not null references operations_types (operation_id) on delete restrict,
+    operation_type_id bigint not null references operations_types (operation_type_id) on delete restrict,
     amount bigint not null,
     currency text not null,
     scale smallint not null,

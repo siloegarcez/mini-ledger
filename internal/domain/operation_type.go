@@ -2,80 +2,57 @@ package domain
 
 import (
 	"errors"
-	"fmt"
-	"slices"
+	"strings"
 )
 
 type OperationType struct {
-	OperationID    int16
-	Description    string
-	SignMultiplier int16
+	OperationTypeID int64
+	Description     string
+	SignMultiplier  int16
 }
 
-var (
-	OperationTypePurchase = &OperationType{
-		OperationID:    1,
-		Description:    "PURCHASE",
-		SignMultiplier: -1,
-	}
-	OperationTypeInstallmentPurchase = &OperationType{
-		OperationID:    2,
-		Description:    "INSTALLMENT_PURCHASE",
-		SignMultiplier: -1,
-	}
-	OperationTypeWithdrawal = &OperationType{
-		OperationID:    3,
-		Description:    "WITHDRAWAL",
-		SignMultiplier: -1,
-	}
-	OperationTypePayment = &OperationType{
-		OperationID:    4,
-		Description:    "PAYMENT",
-		SignMultiplier: 1,
-	}
+const (
+	MaxDescriptionLength = 30
+	CreditSignMultiplier = 1
+	DebitSignMultiplier  = -1
 )
 
 var (
-	ErrOperationTypeNotFound = errors.New("operation type not found")
-	ErrInvalidOperationType  = errors.New("invalid operation type")
+	ErrOperationTypeInvalidSignMultiplier  = errors.New("invalid operation type sign multiplier")
+	ErrOperationTypeInvalidOperationTypeID = errors.New("invalid operation type ID")
+	ErrOperationTypeEmptyDescription       = errors.New("empty operation type description")
+	ErrOperationTypeInvalidDescriptionLen  = errors.New("invalid operation type description length")
 )
 
-func AllOperationTypes() []*OperationType {
-	return []*OperationType{
-		OperationTypePurchase,
-		OperationTypeInstallmentPurchase,
-		OperationTypeWithdrawal,
-		OperationTypePayment,
-	}
-}
+func NewOperationType(
+	operationTypeID int64,
+	description string,
+	signMultiplier int16,
+) (*OperationType, []error) {
+	errs := []error{}
 
-func GetOperationTypeByID(id int16) (*OperationType, error) {
-	for _, ot := range AllOperationTypes() {
-		if ot.OperationID == id {
-			return ot, nil
-		}
+	if operationTypeID <= 0 {
+		errs = append(errs, ErrOperationTypeInvalidOperationTypeID)
 	}
-	return nil, ErrOperationTypeNotFound
-}
+	if signMultiplier != CreditSignMultiplier && signMultiplier != DebitSignMultiplier {
+		errs = append(errs, ErrOperationTypeInvalidSignMultiplier)
+	}
+	if len(strings.TrimSpace(description)) == 0 {
+		errs = append(errs, ErrOperationTypeEmptyDescription)
+	}
+	if len(description) > MaxDescriptionLength {
+		errs = append(errs, ErrOperationTypeInvalidDescriptionLen)
+	}
 
-func GetDebitOperationTypes() []*OperationType {
-	debitTypes := []*OperationType{}
-	for _, ot := range AllOperationTypes() {
-		if ot.IsDebit() {
-			debitTypes = append(debitTypes, ot)
-		}
+	if len(errs) > 0 {
+		return nil, errs
 	}
-	return debitTypes
-}
 
-func GetCreditOperationTypes() []*OperationType {
-	debitTypes := []*OperationType{}
-	for _, ot := range AllOperationTypes() {
-		if ot.IsCredit() {
-			debitTypes = append(debitTypes, ot)
-		}
-	}
-	return debitTypes
+	return &OperationType{
+		OperationTypeID: operationTypeID,
+		Description:     description,
+		SignMultiplier:  signMultiplier,
+	}, nil
 }
 
 func (ot *OperationType) ApplySign(amount int64) int64 {
@@ -86,43 +63,9 @@ func (ot *OperationType) ApplySign(amount int64) int64 {
 }
 
 func (ot *OperationType) IsDebit() bool {
-	return ot.SignMultiplier == -1
+	return ot.SignMultiplier == DebitSignMultiplier
 }
 
 func (ot *OperationType) IsCredit() bool {
-	return ot.SignMultiplier == 1
-}
-
-func (ot *OperationType) Validate() []error {
-	errs := []error{}
-	if ot.OperationID <= 0 {
-		errs = append(
-			errs,
-			fmt.Errorf("%w: operation id must be positive", ErrInvalidOperationType),
-		)
-	}
-
-	if !slices.Contains(AllOperationTypes(), ot) {
-		errs = append(
-			errs,
-			fmt.Errorf(
-				"%w: operation type with id %d does not exist",
-				ErrInvalidOperationType,
-				ot.OperationID,
-			),
-		)
-	}
-
-	if ot.Description == "" {
-		errs = append(errs, fmt.Errorf("%w: description cannot be empty", ErrInvalidOperationType))
-	}
-
-	if ot.SignMultiplier != -1 && ot.SignMultiplier != 1 {
-		errs = append(
-			errs,
-			fmt.Errorf("%w: sign multiplier must be either -1 or 1", ErrInvalidOperationType),
-		)
-	}
-
-	return errs
+	return ot.SignMultiplier == CreditSignMultiplier
 }

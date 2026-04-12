@@ -47,10 +47,6 @@ func main() {
 										defaultTableModelField.Type.Name = "int64"
 									case "*int32":
 										defaultTableModelField.Type.Name = "*int64"
-									case "float32":
-										defaultTableModelField.Type.Name = "float64"
-									case "*float32":
-										defaultTableModelField.Type.Name = "*float64"
 									}
 
 									return defaultTableModelField

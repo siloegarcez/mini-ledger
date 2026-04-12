@@ -14,7 +14,7 @@ import (
 type Transactions struct {
 	ID              int64 `sql:"primary_key"`
 	AccountID       int64
-	OperationTypeID int16
+	OperationTypeID int64
 	Amount          int64
 	Currency        string
 	Scale           int16

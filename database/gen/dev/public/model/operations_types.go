@@ -12,8 +12,8 @@ import (
 )
 
 type OperationsTypes struct {
-	OperationID    int16 `sql:"primary_key"`
-	Description    string
-	SignMultiplier int16
-	CreatedAt      time.Time
+	OperationTypeID int64 `sql:"primary_key"`
+	Description     string
+	SignMultiplier  int16
+	CreatedAt       time.Time
 }

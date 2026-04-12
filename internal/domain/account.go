@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type Account struct {
 	ID             int64
@@ -9,26 +12,27 @@ type Account struct {
 	UpdatedAt      time.Time
 }
 
-func NewAccount(documentNumber string) (*Account, error) {
-	docNum, err := NewDocumentNumber(documentNumber)
-	if err != nil {
-		return nil, err
+var (
+	ErrAccountDocumentNumberEmpty = errors.New("empty document number")
+)
+
+func NewAccount(documentNumber DocumentNumber) (*Account, []error) {
+	errs := []error{}
+
+	if documentNumber.String() == "" {
+		errs = append(errs, ErrAccountDocumentNumberEmpty)
+	}
+
+	if len(errs) > 0 {
+		return nil, errs
 	}
 
 	now := time.Now()
 
 	return &Account{
 		ID:             0,
-		DocumentNumber: docNum,
+		DocumentNumber: documentNumber,
 		CreatedAt:      now,
 		UpdatedAt:      now,
 	}, nil
-}
-
-func (a *Account) Validate() []error {
-	errs := []error{}
-	if a.DocumentNumber.IsEmpty() {
-		errs = append(errs, ErrInvalidDocumentNumber)
-	}
-	return errs
 }

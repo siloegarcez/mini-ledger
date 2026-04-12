@@ -5,7 +5,10 @@ create table if not exists accounts (
     document_number text not null unique,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
-    constraint chk_accounts_document_number_no_spaces check (document_number !~ '\s')
+    -- No spaces allowed in document_number
+    constraint chk_accounts_document_number_no_spaces check (document_number !~ '\s'),
+    constraint chk_account_document_number_not_empty check (btrim(document_number) != ''),
+    constraint chk_accounts_document_number_max_len check (char_length(document_number) <= 15)
 );
 
 create trigger trg_accounts_updated_at

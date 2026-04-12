@@ -2,18 +2,13 @@ package domain
 
 import (
 	"errors"
-	"fmt"
-	"slices"
 	"time"
 )
 
-// BRL -> 2,  2.50
-// USD -> 2,  1.25
-// JPY -> 0,  100 .
 type Transaction struct {
 	ID            int64
 	AccountID     int64
-	OperationType *OperationType
+	OperationType OperationType
 	Amount        int64
 	Currency      string
 	Scale         int16
@@ -21,38 +16,31 @@ type Transaction struct {
 }
 
 var (
-	ErrInvalidTransctionAccountID       = errors.New("invalid transaction account ID")
-	ErrInvalidTranactionOperationTypeID = errors.New("invalid transaction operation type ID")
-	ErrInvalidTransactionAmount         = errors.New("invalid transaction amount")
-	ErrInvalidTransactionCurrency       = errors.New("invalid transaction currency")
-	ErrInvalidTransactionScale          = errors.New("invalid transaction scale")
+	ErrTransctionInvalidAccountID          = errors.New("invalid transaction account ID")
+	ErrTranactionInvalidOperationTypeID    = errors.New("invalid transaction operation type ID")
+	ErrTransactionInvalidTransactionAmount = errors.New("invalid transaction amount")
 )
 
 const (
-	TransactionCurrencyLength = 3
+	BRL      = "BRL"
+	BRLScale = 2
 )
 
 func NewTransaction(
 	accountID int64,
-	operationType *OperationType,
+	operationType OperationType,
 	amount int64,
-	currency string,
-	scale int16,
-) (*Transaction, error) {
+) (*Transaction, []error) {
+	errs := []error{}
 	if accountID <= 0 {
-		return nil, ErrInvalidTransctionAccountID
+		errs = append(errs, ErrTransctionInvalidAccountID)
 	}
-	if operationType == nil || !slices.Contains(AllOperationTypes(), operationType) {
-		return nil, ErrInvalidTranactionOperationTypeID
+	if amount == 0 {
+		errs = append(errs, ErrTransactionInvalidTransactionAmount)
 	}
-	if amount <= 0 {
-		return nil, ErrInvalidTransactionAmount
-	}
-	if len(currency) != TransactionCurrencyLength {
-		return nil, ErrInvalidTransactionCurrency
-	}
-	if scale < 0 {
-		return nil, ErrInvalidTransactionScale
+
+	if len(errs) > 0 {
+		return nil, errs
 	}
 
 	signedAmount := operationType.ApplySign(amount)
@@ -64,8 +52,8 @@ func NewTransaction(
 		AccountID:     accountID,
 		OperationType: operationType,
 		Amount:        signedAmount,
-		Currency:      currency,
-		Scale:         scale,
+		Currency:      BRL,
+		Scale:         BRLScale,
 		EventDate:     now,
 	}, nil
 }
@@ -76,45 +64,4 @@ func (t *Transaction) IsDebit() bool {
 
 func (t *Transaction) IsCredit() bool {
 	return t.Amount > 0
-}
-
-func (t *Transaction) Validate() []error {
-	errs := []error{}
-	if t.AccountID <= 0 {
-		errs = append(errs, ErrInvalidTransctionAccountID)
-	}
-	if !slices.Contains(AllOperationTypes(), t.OperationType) {
-		errs = append(errs, ErrInvalidTranactionOperationTypeID)
-	}
-	if t.Amount <= 0 {
-		errs = append(errs, ErrInvalidTransactionAmount)
-	}
-	if len(t.Currency) != TransactionCurrencyLength {
-		errs = append(errs, ErrInvalidTransactionCurrency)
-	}
-	if t.Scale < 0 {
-		errs = append(errs, ErrInvalidTransactionScale)
-	}
-
-	if t.OperationType.IsCredit() && t.Amount < 0 {
-		errs = append(
-			errs,
-			fmt.Errorf(
-				"%w: debit transaction must have positive amount",
-				ErrInvalidTransactionAmount,
-			),
-		)
-	}
-
-	if t.OperationType.IsDebit() && t.Amount > 0 {
-		errs = append(
-			errs,
-			fmt.Errorf(
-				"%w: credit transaction must have negative amount",
-				ErrInvalidTransactionAmount,
-			),
-		)
-	}
-
-	return errs
 }

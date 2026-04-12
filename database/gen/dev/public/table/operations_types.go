@@ -17,10 +17,10 @@ type operationsTypesTable struct {
 	postgres.Table
 
 	// Columns
-	OperationID    postgres.ColumnInteger
-	Description    postgres.ColumnString
-	SignMultiplier postgres.ColumnInteger
-	CreatedAt      postgres.ColumnTimestampz
+	OperationTypeID postgres.ColumnInteger
+	Description     postgres.ColumnString
+	SignMultiplier  postgres.ColumnInteger
+	CreatedAt       postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -62,23 +62,23 @@ func newOperationsTypesTable(schemaName, tableName, alias string) *OperationsTyp
 
 func newOperationsTypesTableImpl(schemaName, tableName, alias string) operationsTypesTable {
 	var (
-		OperationIDColumn    = postgres.IntegerColumn("operation_id")
-		DescriptionColumn    = postgres.StringColumn("description")
-		SignMultiplierColumn = postgres.IntegerColumn("sign_multiplier")
-		CreatedAtColumn      = postgres.TimestampzColumn("created_at")
-		allColumns           = postgres.ColumnList{OperationIDColumn, DescriptionColumn, SignMultiplierColumn, CreatedAtColumn}
-		mutableColumns       = postgres.ColumnList{DescriptionColumn, SignMultiplierColumn, CreatedAtColumn}
-		defaultColumns       = postgres.ColumnList{CreatedAtColumn}
+		OperationTypeIDColumn = postgres.IntegerColumn("operation_type_id")
+		DescriptionColumn     = postgres.StringColumn("description")
+		SignMultiplierColumn  = postgres.IntegerColumn("sign_multiplier")
+		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
+		allColumns            = postgres.ColumnList{OperationTypeIDColumn, DescriptionColumn, SignMultiplierColumn, CreatedAtColumn}
+		mutableColumns        = postgres.ColumnList{DescriptionColumn, SignMultiplierColumn, CreatedAtColumn}
+		defaultColumns        = postgres.ColumnList{CreatedAtColumn}
 	)
 
 	return operationsTypesTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		OperationID:    OperationIDColumn,
-		Description:    DescriptionColumn,
-		SignMultiplier: SignMultiplierColumn,
-		CreatedAt:      CreatedAtColumn,
+		OperationTypeID: OperationTypeIDColumn,
+		Description:     DescriptionColumn,
+		SignMultiplier:  SignMultiplierColumn,
+		CreatedAt:       CreatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
