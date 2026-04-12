@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"mini-ledger/config"
+	"mini-ledger/internal/handler"
 	"mini-ledger/internal/middleware"
 	"net/http"
 	"time"
@@ -35,6 +36,8 @@ func New(conf config.Config, db *sql.DB) *server {
 	}
 
 	humaConfig := huma.DefaultConfig(conf.Name, conf.Version)
+	humaConfig.CreateHooks = nil
+	humaConfig.DocsRenderer = huma.DocsRendererSwaggerUI
 
 	huma.NewError = func(status int, msg string, errs ...error) huma.StatusError {
 		if status >= 500 {
@@ -75,7 +78,8 @@ func New(conf config.Config, db *sql.DB) *server {
 func (s *server) RegisterRoutes() {
 	s.huma.UseMiddleware(middleware.Logger(s.config, s.huma))
 	s.huma.UseMiddleware(middleware.Recoverer(s.config, s.huma))
-	registerAllRoutes(s)
+	handlers := handler.WireLayers(s.db)
+	handler.RegisterAllRoutes(handlers, s.huma)
 }
 
 func (s *server) ListenAndServe() error {

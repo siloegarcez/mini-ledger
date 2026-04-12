@@ -13,6 +13,6 @@ type TransactionRepository interface {
 	Create(ctx context.Context, transaction *Transaction) (*Transaction, error)
 }
 
-type OperationsTypesRepository interface {
+type OperationTypeRepository interface {
 	GetByID(ctx context.Context, id int64) (*OperationType, error)
 }
