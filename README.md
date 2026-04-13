@@ -115,6 +115,10 @@ make run-watch
 
 ## Testes e cobertura
 
+O módulo `internal/domain` possui **100% de teste coverage**
+
+Testes de integração estão em `internal/handler` todas as rotas da API são cobertas por testes de integração.
+
 Rodar todos os testes do modulo `internal` (unitários e de integração):
 
 ```bash
