@@ -121,54 +121,6 @@ func TestNewOperationType(t *testing.T) {
 	}
 }
 
-// func TestOperationType_ApplySign(t *testing.T) {
-// 	tests := []struct {
-// 		name           string
-// 		signMultiplier int16
-// 		amount         string
-// 		wantAmount     string
-// 	}{
-// 		{
-// 			name:           "debit makes positive amount negative",
-// 			signMultiplier: domain.DebitSignMultiplier,
-// 			amount:         "123.45",
-// 			wantAmount:     "-123.45",
-// 		},
-// 		{
-// 			name:           "debit keeps already negative amount",
-// 			signMultiplier: domain.DebitSignMultiplier,
-// 			amount:         "-123.45",
-// 			wantAmount:     "-123.45",
-// 		},
-// 		{
-// 			name:           "credit does not change positive amount",
-// 			signMultiplier: domain.CreditSignMultiplier,
-// 			amount:         "123.45",
-// 			wantAmount:     "123.45",
-// 		},
-// 		{
-// 			name:           "credit does not change negative amount",
-// 			signMultiplier: domain.CreditSignMultiplier,
-// 			amount:         "-123.45",
-// 			wantAmount:     "-123.45",
-// 		},
-// 	}
-//
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			t.Parallel()
-//
-// 			amount, err := domain.NewBRLMoneyFromString(tt.amount)
-// 			require.NoError(t, err)
-//
-// 			ot := domain.OperationType{SignMultiplier: tt.signMultiplier} //nolint: exhaustruct
-// 			signedAmount := ot.ApplySign(amount)
-//
-// 			assert.Equal(t, tt.wantAmount, signedAmount.String())
-// 		})
-// 	}
-// }
-
 func TestOperationType_IsDebit(t *testing.T) {
 	tests := []struct {
 		name           string

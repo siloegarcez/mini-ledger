@@ -2,7 +2,7 @@ package handler
 
 import (
 	"database/sql"
-	"mini-ledger/internal/repository"
+	repository "mini-ledger/internal/repository/postgres"
 	"mini-ledger/internal/service"
 )
 
