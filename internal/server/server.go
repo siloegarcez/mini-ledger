@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"mini-ledger/config"
 	"mini-ledger/internal/handler"
-	"mini-ledger/internal/middleware"
+	"mini-ledger/internal/handler/middleware"
 	"net/http"
 	"time"
 
