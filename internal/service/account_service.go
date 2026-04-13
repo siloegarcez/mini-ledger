@@ -10,14 +10,19 @@ type AccountService interface {
 	GetByID(ctx context.Context, id int64) (*domain.Account, error)
 }
 
-func NewAccountService(accountRepository domain.AccountRepository) AccountService {
+func NewAccountService(
+	accountRepository domain.AccountRepository,
+	transactor domain.Transactor,
+) AccountService {
 	return &accountService{
 		accountRepository: accountRepository,
+		transactor:        transactor,
 	}
 }
 
 type accountService struct {
 	accountRepository domain.AccountRepository
+	transactor        domain.Transactor
 }
 
 // Create implements [AccountService].

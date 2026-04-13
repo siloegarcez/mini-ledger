@@ -15,11 +15,13 @@ func WireLayers(db *sql.DB) *handlers {
 	accountRepository := repository.NewAccountsRepository(db)
 	transactionRepository := repository.NewTransactionRepository(db)
 	operationTypeRepository := repository.NewOperationTypeRepository(db)
+	transactor := repository.NewTransactor(db)
 
-	accountService := service.NewAccountService(accountRepository)
+	accountService := service.NewAccountService(accountRepository, transactor)
 	transactionService := service.NewTransactionService(
 		transactionRepository,
 		operationTypeRepository,
+		transactor,
 	)
 
 	accountHandler := NewAccountHandler(accountService)
