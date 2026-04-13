@@ -22,7 +22,7 @@ build:
 
 test:
 	@echo "Running all tests..."
-	@go test -v ./...
+	@go test ./...
 
 fmt:
 	@golangci-lint fmt 

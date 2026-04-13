@@ -9,16 +9,16 @@ type Transaction struct {
 	ID            int64
 	AccountID     int64
 	OperationType OperationType
-	Amount        int64
+	Amount        BRLMoney
 	Currency      string
-	Scale         int16
 	EventDate     time.Time
 }
 
 var (
-	ErrTransctionInvalidAccountID          = errors.New("invalid transaction account ID")
-	ErrTranactionInvalidOperationTypeID    = errors.New("invalid transaction operation type ID")
+	ErrTransactionInvalidAccountID         = errors.New("invalid transaction account ID")
+	ErrTransactionInvalidOperationTypeID   = errors.New("invalid transaction operation type ID")
 	ErrTransactionInvalidTransactionAmount = errors.New("invalid transaction amount")
+	ErrTransactionNegativeAmount           = errors.New("invalid transaction amount sign")
 )
 
 const (
@@ -29,21 +29,31 @@ const (
 func NewTransaction(
 	accountID int64,
 	operationType OperationType,
-	amount int64,
+	amount BRLMoney,
 ) (*Transaction, []error) {
 	errs := []error{}
 	if accountID <= 0 {
-		errs = append(errs, ErrTransctionInvalidAccountID)
+		errs = append(errs, ErrTransactionInvalidAccountID)
 	}
-	if amount == 0 {
+	if amount.Int64() == 0 {
 		errs = append(errs, ErrTransactionInvalidTransactionAmount)
+	}
+
+	if operationType.OperationTypeID <= 0 {
+		errs = append(errs, ErrTransactionInvalidOperationTypeID)
+	}
+
+	if amount.IsNegative() {
+		errs = append(errs, ErrTransactionNegativeAmount)
 	}
 
 	if len(errs) > 0 {
 		return nil, errs
 	}
 
-	signedAmount := operationType.ApplySign(amount)
+	if operationType.IsDebit() {
+		amount = amount.Neg()
+	}
 
 	now := time.Now()
 
@@ -51,17 +61,16 @@ func NewTransaction(
 		ID:            0,
 		AccountID:     accountID,
 		OperationType: operationType,
-		Amount:        signedAmount,
+		Amount:        amount,
 		Currency:      BRL,
-		Scale:         BRLScale,
 		EventDate:     now,
 	}, nil
 }
 
 func (t *Transaction) IsDebit() bool {
-	return t.Amount < 0
+	return t.Amount.IsNegative()
 }
 
 func (t *Transaction) IsCredit() bool {
-	return t.Amount > 0
+	return t.Amount.IsPositive()
 }

@@ -30,14 +30,14 @@ func NewOperationType(
 	signMultiplier int16,
 ) (*OperationType, []error) {
 	errs := []error{}
-
+	description = strings.TrimSpace(description)
 	if operationTypeID <= 0 {
 		errs = append(errs, ErrOperationTypeInvalidOperationTypeID)
 	}
 	if signMultiplier != CreditSignMultiplier && signMultiplier != DebitSignMultiplier {
 		errs = append(errs, ErrOperationTypeInvalidSignMultiplier)
 	}
-	if len(strings.TrimSpace(description)) == 0 {
+	if len(description) == 0 {
 		errs = append(errs, ErrOperationTypeEmptyDescription)
 	}
 	if len(description) > MaxDescriptionLength {
@@ -53,13 +53,6 @@ func NewOperationType(
 		Description:     description,
 		SignMultiplier:  signMultiplier,
 	}, nil
-}
-
-func (ot *OperationType) ApplySign(amount int64) int64 {
-	if amount < 0 {
-		amount = -amount
-	}
-	return amount * int64(ot.SignMultiplier)
 }
 
 func (ot *OperationType) IsDebit() bool {
