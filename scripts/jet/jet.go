@@ -17,9 +17,11 @@ var (
 	}
 )
 
+const dbFolderName = "db"
+
 func main() {
 	err := postgresGen.Generate(
-		"./database/gen",
+		"./gen",
 		postgresGen.DBConnection{ // nolint
 			Host:       "localhost",
 			Port:       5432,

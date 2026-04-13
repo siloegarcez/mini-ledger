@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"mini-ledger/config"
-	"mini-ledger/database"
+	"mini-ledger/internal/database"
 	"mini-ledger/internal/server"
 	"mini-ledger/logging"
 	"net/http"
