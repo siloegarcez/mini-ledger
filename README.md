@@ -21,7 +21,7 @@ API HTTP para gerenciar contas e transacoes financeiras (desafio Pismo), com per
 
 - **[Zerolog](https://github.com/rs/zerolog)**: Uma biblioteca de logging leve e eficiente com zero alocação, que suporta logs estruturados e é fácil de configurar para diferentes níveis de log além de existir suporte para integração com os principais sistemas de logs (Axiom, Datadog, etc).
 
-- **[Migrate](https://github.com/golang-migrate/migrate)** Utilizado para gerencia migrações do banco de dados.
+- **[Migrate](https://github.com/golang-migrate/migrate)** Utilizado para gerencia migrações do banco de dados. 
 
 - **[go-jet](https://github.com/go-jet/jet)** Uma solução completa para acesso eficiente e de alto desempenho a banco de dados, combinando um construtor de SQL com type safety, geração de código e mapeamento automático dos resultados das consultas.
 
@@ -45,23 +45,20 @@ Por simplicidade, o sistema assume a moeda **BRL**, que possui **2 casas decimai
 {
   "amount": 123.45
 }
+```
 
 É internamente representado como:
+```
 amount = 12345
 scale = 2
 currency = "BRL"
+```
 
 ## Pre-requisitos
 
 - Go 1.26+
 - Docker e Docker Compose
 - Make
-
-Opcional (desenvolvimento):
-
-- `air` para hot reload (`make run-watch` instala automaticamente se necessario)
-- `golangci-lint` para lint e formatacao
-- `migrate` CLI para rodar migracoes manualmente
 
 ## Como rodar com Docker Compose
 
@@ -95,7 +92,7 @@ make db-dev
 
 ### 2) Rodar a API
 
-A API é uma CLI que aceita flags para configurar porta outras opções.
+A API é uma CLI que aceita flags para configurar porta e outras opções.
 Para ver os comandos e flags disponiveis:
 
 ```bash
@@ -114,6 +111,20 @@ Com hot reload:
 make run-watch
 ```
 
+## Testes e cobertura
+
+Rodar todos os testes do modulo `internal`:
+
+```bash
+make test
+```
+
+Gerar cobertura de testes (arquivo `coverage.out` + resumo por funcao):
+
+```bash
+make test-coverage
+```
+
 ## Estrutura do projeto
 
 - `cmd/api/main.go`: ponto de entrada da aplicacao (startup, DB, migracoes, servidor)
@@ -128,6 +139,7 @@ make run-watch
 - `migrations/`: scripts SQL de schema e dados iniciais
 - `gen/`: codigo gerado pelo Jet (models/tabelas)
 - `scripts/jet/jet.go`: gerador das estruturas Jet
+
 
 ## Rotas da API (com exemplos)
 
