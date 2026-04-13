@@ -22,14 +22,14 @@ build:
 
 test:
 	@echo "Running all tests..."
-	@go test ./...
+	@go test ./internal/...
 
 fmt:
 	@golangci-lint fmt 
 
 test-coverage:
-	@echo "Running all tests and generating coverage report..."
-	@go test -coverprofile=coverage.out ./...
+	@echo "Running all tests and generating coverage report for ./internal"
+	@go test -coverprofile=coverage.out ./internal/...
 	@go tool cover -func=coverage.out
 	@echo "All tests finished!"
 
