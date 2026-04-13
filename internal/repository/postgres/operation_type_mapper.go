@@ -5,7 +5,9 @@ import (
 	"mini-ledger/internal/domain"
 )
 
-func mapOperationTypeDomainToModel(operationType *domain.OperationType) *model.OperationsTypes {
+func mapOperationTypeDomainToModel( //nolint
+	operationType *domain.OperationType,
+) *model.OperationsTypes {
 	return &model.OperationsTypes{
 		OperationTypeID: operationType.OperationTypeID,
 		Description:     operationType.Description,

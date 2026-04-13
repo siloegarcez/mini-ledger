@@ -3,35 +3,38 @@ package database
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"mini-ledger/config"
+
+	"net/url"
 	"time"
 )
 
-const (
-	sslDisabledConn = "postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s"
-	sslEnabledConn  = "postgres://%s:%s@%s:%s/%s?sslmode=require&search_path=%s"
-)
-
 func Connect(ctx context.Context, conf config.Config) (*sql.DB, error) {
-	connFormat := sslDisabledConn
-
-	if conf.Environment == config.EnvProd || conf.Environment == config.EnvStaging {
-		connFormat = sslEnabledConn
+	u := &url.URL{ //nolint: exhaustruct
+		Scheme: "postgres",
+		Host:   conf.DBHost + ":" + conf.DBPort,
+		Path:   conf.DBName,
 	}
 
-	connStr := fmt.Sprintf(
-		connFormat,
-		conf.DBUsername,
-		conf.DBPassword,
-		conf.DBHost,
-		conf.DBPort,
-		conf.DBName,
-		conf.DBSchema,
-	)
+	u.User = url.UserPassword(conf.DBUsername, conf.DBPassword)
+
+	q := u.Query()
+
+	if conf.Environment == config.EnvProd || conf.Environment == config.EnvStaging {
+		q.Set("sslmode", "require")
+	} else {
+		q.Set("sslmode", "disable")
+	}
+
+	if conf.DBSchema != "" {
+		q.Set("search_path", conf.DBSchema)
+	}
+
+	u.RawQuery = q.Encode()
+
+	connStr := u.String()
 
 	db, err := sql.Open("pgx", connStr)
-
 	if err != nil {
 		return nil, err
 	}
@@ -40,9 +43,7 @@ func Connect(ctx context.Context, conf config.Config) (*sql.DB, error) {
 	db.SetMaxIdleConns(conf.DBMaxIdleConns)
 	db.SetMaxOpenConns(conf.DBMaxOpenConns)
 
-	err = db.PingContext(ctx)
-
-	if err != nil {
+	if err := db.PingContext(ctx); err != nil {
 		return nil, err
 	}
 

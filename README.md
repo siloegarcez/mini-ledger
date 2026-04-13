@@ -9,7 +9,7 @@ API HTTP para gerenciar contas e transacoes financeiras (desafio Pismo), com per
 - **HTTP:** Chi (com Huma para contrato da API)
 - **Banco de dados:** PostgreSQL
 - **Arquitetura:** Arquitetura em camadas (Layered Architecture)
-- **Testes:** `go test` + cobertura
+- **Testes:** `go test` + Testify + Testcontainers
 - **Qualidade:** `golangci-lint` + SQLFluff (SQL linter)
 - **Containerização:** Docker + Docker Compose
 
@@ -113,12 +113,15 @@ make run-watch
 
 ## Testes e cobertura
 
-Rodar todos os testes do modulo `internal`:
+Rodar todos os testes do modulo `internal` (unitários e de integração):
 
 ```bash
 make test
 ```
-
+Rodar todos os testes do modulo `internal` (unitários apenas):
+```bash
+make test-unit
+```
 Gerar cobertura de testes (arquivo `coverage.out` + resumo por funcao):
 
 ```bash

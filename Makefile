@@ -24,6 +24,10 @@ test:
 	@echo "Running all tests..."
 	@go test ./internal/...
 
+test-unit:
+	@echo "Running unit tests..."
+	@go test -short ./internal/...
+
 fmt:
 	@golangci-lint fmt 
 

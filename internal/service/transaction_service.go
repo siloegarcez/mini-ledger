@@ -62,6 +62,10 @@ func (t *transactionService) Create(
 		return nil, huma.Error422UnprocessableEntity(err.Error())
 	}
 
+	if transacType.IsDebit() {
+		newTransac.Amount = newTransac.Amount.Neg()
+	}
+
 	createdTransac, err := t.transactionRepository.Create(ctx, newTransac)
 	if dberrs.Is(err, dberrs.ErrForeignKeyViolation) {
 		return nil, ErrInvalidAccountID
