@@ -53,6 +53,9 @@ mig-up-jet: migrate-up jet
 docker:
 	@docker build -t mini-ledger .
 
+compose-up:
+	@docker-compose up --build
+
 db-dev:
 	@echo "Destroying any existing Postgres container..."
 	@docker rm -f dev-postgres 2>/dev/null || true

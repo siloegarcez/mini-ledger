@@ -55,11 +55,15 @@ type (
 		OperationTypeID int64  `json:"operation_type_id" minimum:"1"`
 		Amount          Number `example:"123.45"         json:"amount" minimum:"1"`
 	}
-	Number string
+	Number    string
+	NumberOut json.RawMessage
 )
 
 // This overrides the default schema generation for the Number type, which would otherwise be treated as a string. Instead, we want it to be treated as a float64 in the schema but still be able to unmarshal from a JSON string. This allows us to have the benefits of using json.Number for precise decimal handling while still generating the correct schema for documentation and validation purposes.
 func (o *Number) Schema(r huma.Registry) *huma.Schema {
+	return huma.SchemaFromType(r, reflect.TypeFor[float64]())
+}
+func (o *NumberOut) Schema(r huma.Registry) *huma.Schema {
 	return huma.SchemaFromType(r, reflect.TypeFor[float64]())
 }
 
@@ -72,4 +76,9 @@ func (n *Number) UnmarshalJSON(data []byte) error {
 	}
 	*n = Number(num)
 	return nil
+}
+
+func (n Number) MarshalJSON() ([]byte, error) {
+	num := json.Number(n)
+	return json.Marshal(num)
 }

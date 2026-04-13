@@ -1,6 +1,8 @@
 package handler
 
-import "mini-ledger/internal/domain"
+import (
+	"mini-ledger/internal/domain"
+)
 
 func mapDomainTransactionToTransactionCreateResponse(
 	transaction *domain.Transaction,
