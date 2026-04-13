@@ -6,8 +6,8 @@ import (
 	"errors"
 	"mini-ledger/config"
 	"mini-ledger/internal/database"
+	"mini-ledger/internal/logger"
 	"mini-ledger/internal/server"
-	"mini-ledger/logging"
 	"net/http"
 	"time"
 
@@ -22,7 +22,7 @@ import (
 
 func main() {
 	cli := humacli.New(func(hooks humacli.Hooks, conf *config.Config) {
-		logging.Configure(*conf)
+		logger.Configure(*conf)
 
 		errs := conf.Validate()
 		if len(errs) != 0 {

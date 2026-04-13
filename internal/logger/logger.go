@@ -1,4 +1,4 @@
-package logging
+package logger
 
 import (
 	"mini-ledger/config"
