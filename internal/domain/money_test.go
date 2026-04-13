@@ -647,3 +647,102 @@ func TestBRLMoney_String(t *testing.T) {
 		})
 	}
 }
+
+func TestNewMoneyFromInt64(t *testing.T) {
+	tests := []struct {
+		name       string
+		amount     int64
+		scale      int16
+		wantCents  int64
+		wantScale  int16
+		wantString string
+		wantErr    error
+	}{
+		{
+			name:       "valid positive amount with BRL scale",
+			amount:     12345,
+			scale:      domain.BRLScale,
+			wantCents:  12345,
+			wantScale:  domain.BRLScale,
+			wantString: "123.45",
+			wantErr:    nil,
+		},
+		{
+			name:       "valid negative amount with BRL scale",
+			amount:     -5010,
+			scale:      domain.BRLScale,
+			wantCents:  -5010,
+			wantScale:  domain.BRLScale,
+			wantString: "-50.10",
+			wantErr:    nil,
+		},
+		{
+			name:       "valid zero amount with BRL scale",
+			amount:     0,
+			scale:      domain.BRLScale,
+			wantCents:  0,
+			wantScale:  domain.BRLScale,
+			wantString: zeroBRLMoneyString,
+			wantErr:    nil,
+		},
+		{
+			name:       "invalid lower scale returns error",
+			amount:     100,
+			scale:      1,
+			wantCents:  0,
+			wantScale:  0,
+			wantString: zeroBRLMoneyString,
+			wantErr:    domain.ErrBRLMoneyInvalidScale,
+		},
+		{
+			name:       "invalid higher scale returns error",
+			amount:     100,
+			scale:      3,
+			wantCents:  0,
+			wantScale:  0,
+			wantString: zeroBRLMoneyString,
+			wantErr:    domain.ErrBRLMoneyInvalidScale,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, gotErr := domain.NewMoneyFromInt64(tt.amount, tt.scale)
+
+			if tt.wantErr != nil {
+				require.ErrorIs(t, gotErr, tt.wantErr)
+				return
+			}
+
+			require.NoError(t, gotErr)
+			assert.Equal(t, tt.wantCents, got.Int64())
+			assert.Equal(t, tt.wantScale, got.Scale())
+			assert.Equal(t, tt.wantString, got.String())
+		})
+	}
+}
+
+func TestBRLMoney_Scale(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  int16
+	}{
+		{name: "zero amount has BRL scale", value: "0", want: domain.BRLScale},
+		{name: "positive amount has BRL scale", value: "123.45", want: domain.BRLScale},
+		{name: "negative amount has BRL scale", value: "-10.00", want: domain.BRLScale},
+		{name: "single decimal amount has BRL scale", value: "10.5", want: domain.BRLScale},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			m, err := domain.NewBRLMoneyFromString(tt.value)
+			require.NoError(t, err)
+
+			got := m.Scale()
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}

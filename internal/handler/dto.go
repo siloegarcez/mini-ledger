@@ -13,7 +13,7 @@ type (
 		Body AccountCreateRequest
 	}
 	AccountCreateRequest struct {
-		DocumentNumber string `example:"12345678900" json:"document_number" maxLength:"15"`
+		DocumentNumber string `example:"12345678900" json:"document_number" maxLength:"15" minLength:"1"`
 	}
 	accountCreateResponse struct {
 		Body AccountCreateResponse
@@ -29,8 +29,11 @@ type (
 		AccountID int64 `minimum:"1" path:"account_id"`
 	}
 	accountGetByIDResponse struct {
+		Body AccountGetByIDResponse
+	}
+	AccountGetByIDResponse struct {
 		AccountID      int64  `json:"account_id"     minimum:"1"`
-		DocumentNumber string `example:"12345678900" json:"document_number" maxLength:"15"`
+		DocumentNumber string `example:"12345678900" json:"document_number" maxLength:"15" minLength:"1"`
 	}
 )
 

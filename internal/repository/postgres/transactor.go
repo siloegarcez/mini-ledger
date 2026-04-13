@@ -34,7 +34,7 @@ func injectTx(ctx context.Context, tx *sql.Tx) context.Context {
 	return context.WithValue(ctx, txKey{}, tx)
 }
 
-func ExtractTx(ctx context.Context) *sql.Tx {
+func extractTx(ctx context.Context) *sql.Tx {
 	if tx, ok := ctx.Value(txKey{}).(*sql.Tx); ok {
 		return tx
 	}

@@ -74,7 +74,7 @@ func newTransactionsTableImpl(schemaName, tableName, alias string) transactionsT
 		EventDateColumn       = postgres.TimestampzColumn("event_date")
 		allColumns            = postgres.ColumnList{IDColumn, AccountIDColumn, OperationTypeIDColumn, AmountColumn, CurrencyColumn, ScaleColumn, EventDateColumn}
 		mutableColumns        = postgres.ColumnList{AccountIDColumn, OperationTypeIDColumn, AmountColumn, CurrencyColumn, ScaleColumn, EventDateColumn}
-		defaultColumns        = postgres.ColumnList{}
+		defaultColumns        = postgres.ColumnList{EventDateColumn}
 	)
 
 	return transactionsTable{

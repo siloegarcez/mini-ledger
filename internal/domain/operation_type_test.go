@@ -3,6 +3,7 @@ package domain_test
 import (
 	"mini-ledger/internal/domain"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,7 +16,7 @@ func TestNewOperationType(t *testing.T) {
 		description     string
 		signMultiplier  int16
 		want            *domain.OperationType
-		wantErrs        []error
+		wantErr         error
 	}{
 		{
 			name:            "valid credit operation type",
@@ -26,8 +27,9 @@ func TestNewOperationType(t *testing.T) {
 				OperationTypeID: 1,
 				Description:     "PAYMENT",
 				SignMultiplier:  domain.CreditSignMultiplier,
+				CreatedAt:       time.Time{},
 			},
-			wantErrs: nil,
+			wantErr: nil,
 		},
 		{
 			name:            "valid debit operation type",
@@ -38,8 +40,9 @@ func TestNewOperationType(t *testing.T) {
 				OperationTypeID: 2,
 				Description:     "INSTALLMENT PURCHASE",
 				SignMultiplier:  domain.DebitSignMultiplier,
+				CreatedAt:       time.Time{},
 			},
-			wantErrs: nil,
+			wantErr: nil,
 		},
 		{
 			name:            "invalid operation type id",
@@ -47,7 +50,7 @@ func TestNewOperationType(t *testing.T) {
 			description:     "PAYMENT",
 			signMultiplier:  domain.CreditSignMultiplier,
 			want:            nil,
-			wantErrs:        []error{domain.ErrOperationTypeInvalidOperationTypeID},
+			wantErr:         domain.ErrOperationTypeInvalidOperationTypeID,
 		},
 		{
 			name:            "invalid sign multiplier",
@@ -55,7 +58,7 @@ func TestNewOperationType(t *testing.T) {
 			description:     "PURCHASE",
 			signMultiplier:  0,
 			want:            nil,
-			wantErrs:        []error{domain.ErrOperationTypeInvalidSignMultiplier},
+			wantErr:         domain.ErrOperationTypeInvalidSignMultiplier,
 		},
 		{
 			name:            "empty description",
@@ -63,7 +66,7 @@ func TestNewOperationType(t *testing.T) {
 			description:     "",
 			signMultiplier:  domain.CreditSignMultiplier,
 			want:            nil,
-			wantErrs:        []error{domain.ErrOperationTypeEmptyDescription},
+			wantErr:         domain.ErrOperationTypeEmptyDescription,
 		},
 		{
 			name:            "blank description",
@@ -71,7 +74,7 @@ func TestNewOperationType(t *testing.T) {
 			description:     "   ",
 			signMultiplier:  domain.CreditSignMultiplier,
 			want:            nil,
-			wantErrs:        []error{domain.ErrOperationTypeEmptyDescription},
+			wantErr:         domain.ErrOperationTypeEmptyDescription,
 		},
 		{
 			name:            "description too long",
@@ -79,19 +82,15 @@ func TestNewOperationType(t *testing.T) {
 			description:     "1234567890123456789012345678901",
 			signMultiplier:  domain.CreditSignMultiplier,
 			want:            nil,
-			wantErrs:        []error{domain.ErrOperationTypeInvalidDescriptionLen},
+			wantErr:         domain.ErrOperationTypeInvalidDescriptionLen,
 		},
 		{
-			name:            "multiple validation errors",
+			name:            "returns first validation error",
 			operationTypeID: -10,
 			description:     "",
 			signMultiplier:  99,
 			want:            nil,
-			wantErrs: []error{
-				domain.ErrOperationTypeInvalidOperationTypeID,
-				domain.ErrOperationTypeInvalidSignMultiplier,
-				domain.ErrOperationTypeEmptyDescription,
-			},
+			wantErr:         domain.ErrOperationTypeInvalidOperationTypeID,
 		},
 	}
 
@@ -99,22 +98,19 @@ func TestNewOperationType(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, gotErrs := domain.NewOperationType(
+			got, gotErr := domain.NewOperationType(
 				tt.operationTypeID,
 				tt.description,
 				tt.signMultiplier,
 			)
 
-			if len(tt.wantErrs) > 0 {
+			if tt.wantErr != nil {
 				require.Nil(t, got)
-				require.Len(t, gotErrs, len(tt.wantErrs))
-				for i, wantErr := range tt.wantErrs {
-					assert.ErrorIs(t, gotErrs[i], wantErr)
-				}
+				assert.ErrorIs(t, gotErr, tt.wantErr)
 				return
 			}
 
-			require.Nil(t, gotErrs)
+			require.NoError(t, gotErr)
 			require.NotNil(t, got)
 			assert.Equal(t, tt.want, got)
 		})

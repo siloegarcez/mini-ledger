@@ -37,7 +37,7 @@ func New(conf config.Config, db *sql.DB) *server {
 
 	humaConfig := huma.DefaultConfig(conf.Name, conf.Version)
 	humaConfig.CreateHooks = nil
-	humaConfig.DocsRenderer = huma.DocsRendererSwaggerUI
+	humaConfig.DocsRenderer = huma.DocsRendererStoplightElements
 
 	huma.NewError = func(status int, msg string, errs ...error) huma.StatusError {
 		if status >= 500 {

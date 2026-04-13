@@ -3,12 +3,14 @@ package domain
 import (
 	"errors"
 	"strings"
+	"time"
 )
 
 type OperationType struct {
 	OperationTypeID int64
 	Description     string
 	SignMultiplier  int16
+	CreatedAt       time.Time
 }
 
 const (
@@ -28,30 +30,26 @@ func NewOperationType(
 	operationTypeID int64,
 	description string,
 	signMultiplier int16,
-) (*OperationType, []error) {
-	errs := []error{}
+) (*OperationType, error) {
 	description = strings.TrimSpace(description)
 	if operationTypeID <= 0 {
-		errs = append(errs, ErrOperationTypeInvalidOperationTypeID)
+		return nil, ErrOperationTypeInvalidOperationTypeID
 	}
 	if signMultiplier != CreditSignMultiplier && signMultiplier != DebitSignMultiplier {
-		errs = append(errs, ErrOperationTypeInvalidSignMultiplier)
+		return nil, ErrOperationTypeInvalidSignMultiplier
 	}
 	if len(description) == 0 {
-		errs = append(errs, ErrOperationTypeEmptyDescription)
+		return nil, ErrOperationTypeEmptyDescription
 	}
 	if len(description) > MaxDescriptionLength {
-		errs = append(errs, ErrOperationTypeInvalidDescriptionLen)
-	}
-
-	if len(errs) > 0 {
-		return nil, errs
+		return nil, ErrOperationTypeInvalidDescriptionLen
 	}
 
 	return &OperationType{
 		OperationTypeID: operationTypeID,
 		Description:     description,
 		SignMultiplier:  signMultiplier,
+		CreatedAt:       time.Time{},
 	}, nil
 }
 

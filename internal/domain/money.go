@@ -20,6 +20,7 @@ var (
 	ErrBRLMoneyInvalidIntegerPart    = errors.New("invalid integer part")
 	ErrBRLMoneyInvalidAmount         = errors.New("invalid amount")
 	ErrBRLMoneyAmountOverflow        = errors.New("money amount overflow")
+	ErrBRLMoneyInvalidScale          = errors.New("invalid money scale")
 )
 
 func NewBRLMoneyFromString(value string) (BRLMoney, error) {
@@ -86,7 +87,18 @@ func NewBRLMoneyFromString(value string) (BRLMoney, error) {
 
 	return BRLMoney{
 		cents: amount,
-		scale: 2,
+		scale: BRLScale,
+	}, nil
+}
+
+func NewMoneyFromInt64(amount int64, scale int16) (BRLMoney, error) {
+	if scale != BRLScale {
+		return BRLMoney{}, ErrBRLMoneyInvalidScale
+	}
+
+	return BRLMoney{
+		cents: amount,
+		scale: scale,
 	}, nil
 }
 
@@ -153,4 +165,8 @@ func (m BRLMoney) IsPositive() bool {
 
 func (m BRLMoney) IsZero() bool {
 	return m.cents == 0
+}
+
+func (m BRLMoney) Scale() int16 {
+	return m.scale
 }

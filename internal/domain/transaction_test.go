@@ -3,132 +3,85 @@ package domain_test
 import (
 	"mini-ledger/internal/domain"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewTransaction(t *testing.T) {
-	validCreditOperationType := domain.OperationType{
-		OperationTypeID: 4,
-		Description:     "PAYMENT",
-		SignMultiplier:  domain.CreditSignMultiplier,
-	}
-
-	validDebitOperationType := domain.OperationType{
-		OperationTypeID: 1,
-		Description:     "PURCHASE",
-		SignMultiplier:  domain.DebitSignMultiplier,
-	}
-
-	positiveAmount, err := domain.NewBRLMoneyFromString("150.25")
-	require.NoError(t, err)
-
-	zeroAmount, err := domain.NewBRLMoneyFromString("0")
-	require.NoError(t, err)
-
-	negativeAmount, err := domain.NewBRLMoneyFromString("-20.10")
-	require.NoError(t, err)
-
 	tests := []struct {
-		name          string
-		accountID     int64
-		operationType domain.OperationType
-		amount        domain.BRLMoney
-		wantErrs      []error
+		name            string
+		accountID       int64
+		operationTypeID int64
+		amountCents     int64
+		wantErr         error
 	}{
 		{
-			name:          "valid credit transaction keeps positive amount",
-			accountID:     10,
-			operationType: validCreditOperationType,
-			amount:        positiveAmount,
-			wantErrs:      nil,
+			name:            "invalid account id returns error",
+			accountID:       0,
+			operationTypeID: 1,
+			amountCents:     1000,
+			wantErr:         domain.ErrTransactionInvalidAccountID,
 		},
 		{
-			name:          "valid debit transaction negates amount",
-			accountID:     20,
-			operationType: validDebitOperationType,
-			amount:        positiveAmount,
-			wantErrs:      nil,
+			name:            "zero amount returns error",
+			accountID:       1,
+			operationTypeID: 1,
+			amountCents:     0,
+			wantErr:         domain.ErrTransactionInvalidTransactionAmount,
 		},
 		{
-			name:          "invalid account id returns error",
-			accountID:     0,
-			operationType: validCreditOperationType,
-			amount:        positiveAmount,
-			wantErrs:      []error{domain.ErrTransactionInvalidAccountID},
+			name:            "invalid operation type id returns error",
+			accountID:       1,
+			operationTypeID: 0,
+			amountCents:     1000,
+			wantErr:         domain.ErrTransactionInvalidOperationTypeID,
 		},
 		{
-			name:      "invalid operation type id returns error",
-			accountID: 1,
-			operationType: domain.OperationType{ //nolint: exhaustruct
-				SignMultiplier: domain.CreditSignMultiplier,
-			},
-			amount:   positiveAmount,
-			wantErrs: []error{domain.ErrTransactionInvalidOperationTypeID},
+			name:            "negative amount returns error",
+			accountID:       1,
+			operationTypeID: 1,
+			amountCents:     -1000,
+			wantErr:         domain.ErrTransactionNegativeAmount,
 		},
 		{
-			name:          "zero amount returns error",
-			accountID:     1,
-			operationType: validCreditOperationType,
-			amount:        zeroAmount,
-			wantErrs:      []error{domain.ErrTransactionInvalidTransactionAmount},
+			name:            "returns first validation error",
+			accountID:       -1,
+			operationTypeID: 0,
+			amountCents:     0,
+			wantErr:         domain.ErrTransactionInvalidAccountID,
 		},
 		{
-			name:          "negative amount returns sign error",
-			accountID:     1,
-			operationType: validCreditOperationType,
-			amount:        negativeAmount,
-			wantErrs:      []error{domain.ErrTransactionNegativeAmount},
-		},
-		{
-			name:          "multiple validation errors are returned",
-			accountID:     0,
-			operationType: domain.OperationType{}, //nolint: exhaustruct
-			amount:        zeroAmount,
-			wantErrs: []error{
-				domain.ErrTransactionInvalidAccountID,
-				domain.ErrTransactionInvalidTransactionAmount,
-				domain.ErrTransactionInvalidOperationTypeID,
-			},
+			name:            "valid transaction",
+			accountID:       1,
+			operationTypeID: 4,
+			amountCents:     1050,
+			wantErr:         nil,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			before := time.Now()
-			got, gotErrs := domain.NewTransaction(tt.accountID, tt.operationType, tt.amount)
-			after := time.Now()
+			amount, err := domain.NewMoneyFromInt64(tt.amountCents, domain.BRLScale)
+			require.NoError(t, err)
 
-			if len(tt.wantErrs) > 0 {
-				require.Nil(t, got)
-				require.Len(t, gotErrs, len(tt.wantErrs))
-				for i, wantErr := range tt.wantErrs {
-					assert.ErrorIs(t, gotErrs[i], wantErr)
-				}
+			got, gotErr := domain.NewTransaction(tt.accountID, tt.operationTypeID, amount)
+
+			if tt.wantErr != nil {
+				require.ErrorIs(t, gotErr, tt.wantErr)
+				assert.Nil(t, got)
 				return
 			}
 
-			require.Nil(t, gotErrs)
+			require.NoError(t, gotErr)
 			require.NotNil(t, got)
-
-			assert.Equal(t, int64(0), got.ID)
 			assert.Equal(t, tt.accountID, got.AccountID)
-			assert.Equal(t, tt.operationType, got.OperationType)
+			assert.Equal(t, tt.operationTypeID, got.OperationTypeID)
+			assert.Equal(t, amount.Int64(), got.Amount.Int64())
+			assert.Equal(t, int16(domain.BRLScale), got.Amount.Scale())
 			assert.Equal(t, domain.BRL, got.Currency)
-			assert.WithinRange(t, got.EventDate, before, after)
-
-			expectedAmount := tt.amount
-			if tt.operationType.IsDebit() {
-				expectedAmount = tt.amount.Neg()
-			}
-			assert.Equal(t, expectedAmount.Int64(), got.Amount.Int64())
-
-			assert.Equal(t, got.Amount.IsNegative(), got.IsDebit())
-			assert.Equal(t, got.Amount.IsPositive(), got.IsCredit())
+			assert.Zero(t, got.EventDate)
 		})
 	}
 }

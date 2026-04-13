@@ -25,5 +25,17 @@ func (t *transactionHandler) HandleCreateTransaction(
 	ctx context.Context,
 	req *transactionCreateRequest,
 ) (*transactionCreateResponse, error) {
-	panic("unimplemented")
+	transac, err := t.transactionService.Create(ctx, &service.CreateTransactionCommand{
+		AccountID:       req.Body.AccountID,
+		OperationTypeID: req.Body.OperationTypeID,
+		Amount:          string(req.Body.Amount),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &transactionCreateResponse{
+		Body: mapDomainTransactionToTransactionCreateResponse(transac),
+	}, nil
 }

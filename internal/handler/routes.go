@@ -11,10 +11,11 @@ func RegisterAllRoutes(h *handlers, api huma.API) {
 	transactionsTag := []string{"Transactions"}
 
 	huma.Register(api, huma.Operation{ //nolint: exhaustruct
-		Method:      http.MethodPost,
-		Path:        "/accounts",
-		Tags:        accountsTag,
-		Description: "Create a new account",
+		Method:        http.MethodPost,
+		Path:          "/accounts",
+		Tags:          accountsTag,
+		Description:   "Create a new account",
+		DefaultStatus: http.StatusCreated,
 	}, h.accountHandler.HandleCreateAccount)
 
 	huma.Register(api, huma.Operation{ //nolint: exhaustruct
@@ -25,9 +26,10 @@ func RegisterAllRoutes(h *handlers, api huma.API) {
 	}, h.accountHandler.HandleGetAccountByID)
 
 	huma.Register(api, huma.Operation{ //nolint: exhaustruct
-		Method:      http.MethodPost,
-		Path:        "/transactions",
-		Tags:        transactionsTag,
-		Description: "Create transaction",
+		Method:        http.MethodPost,
+		Path:          "/transactions",
+		Tags:          transactionsTag,
+		Description:   "Create transaction",
+		DefaultStatus: http.StatusCreated,
 	}, h.transactionHandler.HandleCreateTransaction)
 }

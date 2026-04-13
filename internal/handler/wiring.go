@@ -12,9 +12,10 @@ type handlers struct {
 }
 
 func WireLayers(db *sql.DB) *handlers {
-	accountRepository := repository.NewAccountsRepository(db)
-	transactionRepository := repository.NewTransactionRepository(db)
-	operationTypeRepository := repository.NewOperationTypeRepository(db)
+	executor := repository.NewExecutor(db)
+	accountRepository := repository.NewAccountsRepository(executor)
+	transactionRepository := repository.NewTransactionRepository(executor)
+	operationTypeRepository := repository.NewOperationTypeRepository(executor)
 	transactor := repository.NewTransactor(db)
 
 	accountService := service.NewAccountService(accountRepository, transactor)

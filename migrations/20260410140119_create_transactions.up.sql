@@ -7,7 +7,7 @@ create table if not exists transactions (
     amount bigint not null,
     currency text not null,
     scale smallint not null,
-    event_date timestamptz not null,
+    event_date timestamptz not null default now(),
     constraint chk_transactions_amount_positive check (amount != 0),
     constraint chk_transactions_currency_len_eq_3 check (char_length(currency) = 3)
 );

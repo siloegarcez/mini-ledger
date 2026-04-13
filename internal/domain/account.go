@@ -16,23 +16,15 @@ var (
 	ErrAccountDocumentNumberEmpty = errors.New("empty document number")
 )
 
-func NewAccount(documentNumber DocumentNumber) (*Account, []error) {
-	errs := []error{}
-
+func NewAccount(documentNumber DocumentNumber) (*Account, error) {
 	if documentNumber.String() == "" {
-		errs = append(errs, ErrAccountDocumentNumberEmpty)
+		return nil, ErrAccountDocumentNumberEmpty
 	}
-
-	if len(errs) > 0 {
-		return nil, errs
-	}
-
-	now := time.Now()
 
 	return &Account{
 		ID:             0,
 		DocumentNumber: documentNumber,
-		CreatedAt:      now,
-		UpdatedAt:      now,
+		CreatedAt:      time.Time{},
+		UpdatedAt:      time.Time{},
 	}, nil
 }

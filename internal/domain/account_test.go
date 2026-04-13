@@ -15,17 +15,17 @@ func TestNewAccount(t *testing.T) {
 	tests := []struct {
 		name           string
 		documentNumber domain.DocumentNumber
-		wantErrs       []error
+		wantErr        error
 	}{
 		{
 			name:           "empty document number returns validation error",
 			documentNumber: domain.DocumentNumber{},
-			wantErrs:       []error{domain.ErrAccountDocumentNumberEmpty},
+			wantErr:        domain.ErrAccountDocumentNumberEmpty,
 		},
 		{
 			name:           "valid document number creates account",
 			documentNumber: validDocumentNumber,
-			wantErrs:       nil,
+			wantErr:        nil,
 		},
 	}
 
@@ -33,18 +33,15 @@ func TestNewAccount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, gotErrs := domain.NewAccount(tt.documentNumber)
+			got, gotErr := domain.NewAccount(tt.documentNumber)
 
-			require.Len(t, gotErrs, len(tt.wantErrs))
-
-			for i := range tt.wantErrs {
-				require.ErrorIs(t, gotErrs[i], tt.wantErrs[i])
-			}
-
-			if len(tt.wantErrs) > 0 {
+			if tt.wantErr != nil {
+				require.ErrorIs(t, gotErr, tt.wantErr)
 				assert.Nil(t, got)
 				return
 			}
+
+			require.NoError(t, gotErr)
 
 			require.NotNil(t, got)
 
@@ -52,9 +49,9 @@ func TestNewAccount(t *testing.T) {
 
 			assert.Equal(t, tt.documentNumber.String(), got.DocumentNumber.String())
 
-			assert.False(t, got.CreatedAt.IsZero())
+			assert.True(t, got.CreatedAt.IsZero())
 
-			assert.False(t, got.UpdatedAt.IsZero())
+			assert.True(t, got.UpdatedAt.IsZero())
 
 			assert.True(t, got.CreatedAt.Equal(got.UpdatedAt))
 		})

@@ -6,12 +6,12 @@ import (
 )
 
 type Transaction struct {
-	ID            int64
-	AccountID     int64
-	OperationType OperationType
-	Amount        BRLMoney
-	Currency      string
-	EventDate     time.Time
+	ID              int64
+	AccountID       int64
+	OperationTypeID int64
+	Amount          BRLMoney
+	Currency        string
+	EventDate       time.Time
 }
 
 var (
@@ -28,42 +28,31 @@ const (
 
 func NewTransaction(
 	accountID int64,
-	operationType OperationType,
+	operationTypeID int64,
 	amount BRLMoney,
-) (*Transaction, []error) {
-	errs := []error{}
+) (*Transaction, error) {
 	if accountID <= 0 {
-		errs = append(errs, ErrTransactionInvalidAccountID)
+		return nil, ErrTransactionInvalidAccountID
 	}
 	if amount.Int64() == 0 {
-		errs = append(errs, ErrTransactionInvalidTransactionAmount)
+		return nil, ErrTransactionInvalidTransactionAmount
 	}
 
-	if operationType.OperationTypeID <= 0 {
-		errs = append(errs, ErrTransactionInvalidOperationTypeID)
+	if operationTypeID <= 0 {
+		return nil, ErrTransactionInvalidOperationTypeID
 	}
 
 	if amount.IsNegative() {
-		errs = append(errs, ErrTransactionNegativeAmount)
+		return nil, ErrTransactionNegativeAmount
 	}
-
-	if len(errs) > 0 {
-		return nil, errs
-	}
-
-	if operationType.IsDebit() {
-		amount = amount.Neg()
-	}
-
-	now := time.Now()
 
 	return &Transaction{
-		ID:            0,
-		AccountID:     accountID,
-		OperationType: operationType,
-		Amount:        amount,
-		Currency:      BRL,
-		EventDate:     now,
+		ID:              0,
+		AccountID:       accountID,
+		OperationTypeID: operationTypeID,
+		Amount:          amount,
+		Currency:        BRL,
+		EventDate:       time.Time{},
 	}, nil
 }
 
