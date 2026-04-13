@@ -34,7 +34,7 @@ type transactionService struct {
 
 var (
 	ErrInvalidAccountID     = huma.Error400BadRequest("invalid account id")
-	ErrInvalidOperationType = huma.Error400BadRequest("operation type not found")
+	ErrInvalidOperationType = huma.Error400BadRequest("invalid operation type")
 )
 
 // Create implements [TransactionService].
