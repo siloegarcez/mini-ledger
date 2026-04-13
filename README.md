@@ -21,21 +21,23 @@ API HTTP para gerenciar contas e transacoes financeiras (desafio Pismo), com per
 
 - **[Zerolog](https://github.com/rs/zerolog)**: Uma biblioteca de logging leve e eficiente com zero alocação, que suporta logs estruturados e é fácil de configurar para diferentes níveis de log além de existir suporte para integração com os principais sistemas de logs (Axiom, Datadog, etc).
 
-- **[Migrate](https://github.com/golang-migrate/migrate)** Utilizado para gerencia migrações do banco de dados. 
+- **[Migrate](https://github.com/golang-migrate/migrate)** Utilizado para gerenciar migrações do banco de dados. 
 
 - **[go-jet](https://github.com/go-jet/jet)** Uma solução completa para acesso eficiente e de alto desempenho a banco de dados, combinando um construtor de SQL com type safety, geração de código e mapeamento automático dos resultados das consultas.
 
+- **[Testcontainers](https://testcontainers.com/)** Para garantir que os testes rodem em um ambiente realista e isolado, utilizando containers ao invés de mocks.
+
 ## Decisões técnicas
 
-### 💰 Representação de Valores Monetários
+### Representação de Valores Monetários
 
 Esta codebase **não utiliza `float32` ou `float64`** para representar valores monetários. Tipos de ponto flutuante podem introduzir erros de precisão devido à sua representação binária, o que é inadequado para operações financeiras.
 
 Para garantir precisão e consistência:
 
 - Valores monetários são manipulados utilizando **`int64`**, representando a menor unidade da moeda (centavos).
-- A API faz o parse de valores monetários como **string**, evitando qualquer conversão implícita para ponto flutuante durante o parsing.
 - O parsing é realizado utilizando `json.Number`, garantindo que os valores não sejam convertidos para `float` em nenhum momento do fluxo.
+- Utilizar `int64` com scale aproveita instruções nativas da CPU (operações inteiras simples e diretas), enquanto tipos decimais (decimal, big.Rat, etc.) dependem de operações mais complexas em software (múltiplas instruções, alocação e normalização), tornando cálculos mais custosos em CPU e menos previsíveis em desempenho.
 
 Por simplicidade, o sistema assume a moeda **BRL**, que possui **2 casas decimais fixas**. Esse padrão é validado e aplicado consistentemente em toda a aplicação.
 
@@ -51,7 +53,7 @@ Por simplicidade, o sistema assume a moeda **BRL**, que possui **2 casas decimai
 ```
 amount = 12345
 scale = 2
-currency = "BRL"
+currency = "BRL" <- ISO 4217
 ```
 
 ## Pre-requisitos
@@ -133,7 +135,7 @@ make test-coverage
 - `cmd/api/main.go`: ponto de entrada da aplicacao (startup, DB, migracoes, servidor)
 - `config/`: configuracao da aplicacao e ambientes (`dev`, `staging`, `prod`)
 - `internal/server/`: inicializacao HTTP, middlewares, Huma/Chi e registro de rotas
-- `internal/handler/`: camada HTTP (DTOs, handlers e mapeamentos de request/response)
+- `internal/handler/`: camada HTTP (DTOs, handlers e mapeamentos de request/response e testes de integração)
 - `internal/service/`: regras de negocio e validacoes de caso de uso
 - `internal/domain/`: entidades, value objects e contratos (interfaces)
 - `internal/repository/postgres/`: implementacao de repositorios com PostgreSQL/Jet
@@ -144,7 +146,7 @@ make test-coverage
 - `scripts/jet/jet.go`: gerador das estruturas Jet
 
 
-## Rotas da API (com exemplos)
+## Rotas da API
 
 ### 1) Criar conta
 
